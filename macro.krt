@@ -1,0 +1,117 @@
+
+IniciaSegDatos Macro datos
+    xor ax, ax
+    mov ax, datos
+    mov ds, ax
+EndM
+
+Validamos Macro etilin,ayuda,texto,inversa,izquierda,derecha,nombrebmp
+		mov si, 80h ;apunta al inicio de la linea de comando
+
+      	inc si ;quita el espacio blanco que sale de primero en linea de comando
+      	inc si ;para revisar que no haya otro espacio en blanco, lo que llevaria a mandar un mensaje
+      	mov dl, byte ptr es:[si]
+      	cmp dl, 2Fh ;compara el caracter a ver si es un slash
+        jne noSlash ;si no es igual a un slash 
+
+        mov ah, 09h ;imprime etiqueta de aviso
+        lea dx, etilin
+        int 21h
+
+        inc si ;para revisar que viene despues del slash
+        mov dl, byte ptr es:[si]
+        cmp dl, 3Fh ;a ver si es un signo de pregunta
+        je Ayudas
+        cmp dl, 48h ;a ver si es igual a H
+        je Ayudas
+        cmp dl, 68h ;a ver si es igual a h
+        je ayudas
+        cmp dl, 41h ;a ver si es igual a una A
+        je Ascii
+        cmp dl, 61h ;a ver si es igual a una a
+        je Ascii
+        cmp dl, 72h ;a ver si es igual a una r
+        je Inverso
+        cmp dl, 69h ;a ver si es igual a una i
+        je Izquierdo
+        cmp dl, 64h ;a ver si es igual a una d
+        je Derecho
+
+    Ayudas:
+        mov ah, 09h
+        lea dx, ayuda
+        int 21h
+
+
+        mov ah, 09h ;imprime etiqueta de aviso
+        lea dx, etilin
+        int 21h
+
+        RetornaDOS
+
+    Ascii:
+        mov ah, 09h
+        lea dx, texto
+        int 21h
+
+
+        mov ah, 09h ;imprime etiqueta de aviso
+        lea dx, etilin
+        int 21h
+
+        RetornaDOS
+
+    Inverso:
+        mov ah, 09h
+        lea dx, inversa
+        int 21h
+
+
+        mov ah, 09h ;imprime etiqueta de aviso
+        lea dx, etilin
+        int 21h
+
+        RetornaDOS
+
+    Izquierdo:
+        mov ah, 09h
+        lea dx, izquierda
+        int 21h
+
+
+        mov ah, 09h ;imprime etiqueta de aviso
+        lea dx, etilin
+        int 21h
+
+        RetornaDOS
+
+    Derecho:
+        mov ah, 09h
+        lea dx, derecha
+        int 21h
+
+
+        mov ah, 09h ;imprime etiqueta de aviso
+        lea dx, etilin
+        int 21h
+
+        RetornaDOS
+
+	noSlash:
+        cmp dl, 20h ;a ver si es un espacio en blanco
+
+        mov ah, 09h ;imprime etiqueta de aviso
+        lea dx, etilin
+        int 21h
+
+        mov ah, 09h ;imprime etiqueta de aviso
+        lea dx, nombrebmp
+        int 21h
+
+        RetornaDOS
+EndM
+
+RetornaDOS Macro
+    mov ax, 4c00h
+    int 21h
+EndM
