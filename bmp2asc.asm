@@ -1,73 +1,87 @@
-IDEAL
-P386
 ;----------------------------------------------------------------------------
-SEGMENT pila STACK 'STACK'
+pila segment
+
 DB 1024 DUP(?)
-ENDS
+
+pila ends
 ;----------------------------------------------------------------------------
-SEGMENT datos USE32
-ARCHIVO DB 15 DUP(?),'$' ;PICA2.BMP',0
+datos segment 
+
+;*****DEFINO VARIABLES*****
+
+CAMBIO DB 13,10
+
+A0 DB '1'
+A1 DB '2'
+A2 DB '3'
+A3 DB '4'
+A4 DB '5'
+A5 DB '6'
+A6 DB '7'
+A7 DB '8'
+A8 DB '9'
+A9 DB '0'
+A10 DB 'A'
+A11 DB 'B'
+A12 DB 'C'
+A13 DB 'D'
+A14 DB 'E'
+A15 DB 'F'
+
+ARCHIVO     db  15 DUP (?),'$'
 ARCHIVO2 DB 'DOCU2.TXT',0
-SALVE db 119 DUP (?),'$'
+SALVE DB 116 DUP ( )
+
 HANDLER DW ?
 HANDLER2 DW ?
-ANCHO DB 4 DUP (?)
-ALTO DB 4 DUP (?)
+ANCHO DB 4 DUP ( )
+ALTO DB 4 DUP ( )
 PIXEL1 DB 0
 PIXEL2 DB 0
 
-TAMAÑO DB 4 DUP (?)
+TAMAÃ‘O DB 4 DUP ( )
 
 COLUMNA DW 50
 FILA DW 100
 
 ANCHO_NUM DW 0
 ALTO_NUM DW 0
+ALTO_NUM2 DW 0
 
-CONTENIDO DB 640 DUP (?) 
+RESETEO DW 0
 
-A0 DB '_','$'
-A1 DB '@','$'
-A2 DB '!','$'
-A3 DB '#','$'
-A4 DB '%','$'
-A5 DB '&','$'
-A6 DB '/','$'
-A7 DB '?','$'
-A8 DB '*','$'
-A9 DB '+','$'
-A10 DB '[','$'
-A11 DB 'º','$'
-A12 DB 'ª','$'
-A13 DB '=','$'
-A14 DB 'ç','$'
-A15 DB '-','$'
+CONTENIDO DB 320 DUP ( ) 
 
-CAMBIO DB 13,10,'$'
+etilin db "--------------------------------------------------------------------------------","$"
+ayuda1 db  '*************************BIENVENIDO AL CENTRO DE AYUDA*************************',10,13,'$'
+ayuda2 db  'A CONTINUACION SE PRESENTA LA GUIA PARA USAR EL PROGRAMA: ',10,13,'$'
+ayuda3 db  '****************************DESPLEGAR IMAGEN NORMAL****************************',10,13,'$'
+ayuda4 db  'ESCRIBIR EL NOMBRE DEL PROGRAMA, SEGUIDO POR UN ESPACIO, Y DESPUES ESCRIBIR EL NOMBRE DE LA IMAGEN (EJ: BMP2ASC PICA.BMP)',10,13,'$'
+ayuda5 db  '****************************DESPLEGAR IMAGEN INVERSA***************************',10,13,'$'
+ayuda6 db  'ESCRIBIR EL NOMBRE DEL PROGRAMA, SEGUIDO POR UN ESPACIO, DESPUES ESCRIBIR EL',10,13,'$'
+ayuda7 db  'NOMBRE DE LA IMAGEN, SEGUIDO POR UN ESPACIO, Y AL FINAL PONER /r (EJ: BMP2ASC PICA.BMP /r)',10,13,'$'
+ayuda8 db  '****************************DESPLEGAR IMAGEN ASCII***************************',10,13,'$'
+ayuda9 db  'ESCRIBIR EL NOMBRE DEL PROGRAMA, SEGUIDO POR UN ESPACIO, DESPUES ESCRIBIR EL',10,13,'$'
+ayuda10 db  'NOMBRE DE LA IMAGEN, SEGUIDO POR UN ESPACIO, Y AL FINAL PONER /a (EJ: BMP2ASC PICA.BMP /a). EL ARCHIVO SE VA A LLAMAR DOCU2.TXT',10,13,'$'
+ayuda11 db  '****************************CENTRO DE AYUDA***************************',10,13,'$'
+ayuda12 db  'ESCRIBIR EL NOMBRE DEL PROGRAMA, SEGUIDO POR UN ESPACIO, DESPUES ESCRIBIR UN',10,13,'$'
+ayuda13 db  '/?, O UN /H, O UN /h (EJ: BMP2ASC PICA.BMP /?)',10,13,'$'
 
-   etilin db "--------------------------------------------------------------------------------","$"
-   ayuda db 'Usted ha entrado al centro de ayuda',10,13,'$'
-   texto db 'Mostrar txt con el arte ASCII',10,13,'$'
-   inversa  db 'Modo inverso',10,13,'$'
-   izquierda   db    'Rotado a la izquierda',10,13,'$'
-   derecha  db    'Rotado a la derecha',10,13,'$'
-   nombrebmp   db    'Deberia ser el nombre de la imagen bmp...',10,13,'$'
-    guardabmp   db  'Se guardo el nombre del bmp!!!',10,13,'$'
-    ;archivo     db  15 DUP (?),'$'
-    bmp1    db      4 DUP (?)
+texto db  'Mostrar txt con el arte ASCII',10,13,'$'
+inversa db  'Modo inverso',10,13,'$'
+izquierda   db  'Rotado a la izquierda',10,13,'$'
+derecha   db  'Rotado a la derecha',10,13,'$'
+nombrebmp   db  'Deberia ser el nombre de la imagen bmp...',10,13,'$'
+guardabmp   db  'Se guardo el nombre del bmp!!!',10,13,'$'
+archivos     db  15 DUP (?),'$'
+bmp1    db      4 DUP (?)
 
-ENDS
+datos ENDS
 ;----------------------------------------------------------------------------
-SEGMENT codigo USE16
-ASSUME CS:CODIGO,DS:DATOS
+codigo segment
+assume cs:codigo,ds:datos,ss:pila
 ;----------------------------------------------------------------------------
-PROC RETORNADOS NEAR
-      MOV AH,4CH
-      MOV AL,0
-      INT 21H
-ENDP
-;----------------------------------------------------------------------------
-PROC LIMPIAR NEAR   
+ LIMPIAR PROC NEAR   
    MOV AX,0600H      ;AH = 06 (RECORRIDO), AL= 00 (PANTALLA COMPLETA)
    MOV BH,0AH        ;NEGRO =0 (FONDO), ROJO =2 (LETRAS)
    MOV CX,0000H      ;EMPEZAR DE ESQUINA SUPERIOR IZQUIERDA
@@ -76,22 +90,23 @@ PROC LIMPIAR NEAR
    RET
 ENDP
 ;----------------------------------------------------------------------------
-PROC VIDEO NEAR   
-   MOV AH,00H      ;
-   MOV AL,12H        ;0Ch     = modo gr fico 640x480
+ VIDEO PROC NEAR   
+   MOV AH,00H      ;PONER MODO GRAFICO
+   MOV AL,12H      ;12Ch     = modo grÂ fico 640x480
 
    INT 10H   
    RET
 ENDP
 ;----------------------------------------------------------------------------
-PROC DIVIDE2 NEAR
+ DIVIDE2 PROC NEAR
     PUSH BX
 	PUSH DX
-	
-	MOV AX,[ANCHO_NUM]
-	MOV BX,2
+	                     ;divide el contenido de ancho num entre 2, esto xq
+	MOV AX,[ANCHO_NUM]   ;cada lectura contiene 2 pixeles, por ende no se
+	MOV BX,2             ;necesita leer 640 sino 320
 	MOV DX,0
     DIV BX
+	
 	MOV [ANCHO_NUM],AX
 	
 
@@ -103,15 +118,17 @@ PROC DIVIDE2 NEAR
    RET
 ENDP
 ;----------------------------------------------------------------------------
-PROC CURSOR NEAR
+ CURSOR PROC NEAR
    
    XOR CX,CX  ; EMPEZAR EN COLUMNA 0
    XOR BX,BX
-   MOV SI,OFFSET CONTENIDO
-
+   MOV SI,OFFSET CONTENIDO       ;APUNTA AL PRIMER CARCTER DEL CONTENIDO 
+                                 ;CONTENIDO VA A TENER UNA LINEA DE CARACTERES QUE ES LA QUE SE VA A DESPLEGAR
 @@CICLO2: 
   CALL IDENTIFICAR_PIXEL1
-  CALL IDENTIFICAR_PIXEL2  
+  INC CX
+  CALL IDENTIFICAR_PIXEL2 
+  CALL IDENTIFICAR_PIXEL2_X  
   INC CX
   INC BX
   INC SI
@@ -119,11 +136,10 @@ PROC CURSOR NEAR
   JBE @@CICLO2
   
 
-@@FIN:
    RET
 ENDP
 ;----------------------------------------------------------------------------
-PROC CONVIERTE2 NEAR
+ CONVIERTE2 PROC NEAR           ;DIVIDO ENTRE 16 PARA DESCOMPONER LOS PIXELES Y SEPARARLOS PARA PODER DESPLEGARLOS
     PUSH BX
 	PUSH DX
 	
@@ -140,19 +156,27 @@ PROC CONVIERTE2 NEAR
    RET
 ENDP	  
 ;----------------------------------------------------------------------------
-PROC IDENTIFICAR_PIXEL1 NEAR
-   MOV AX,[SI]
-   MOV AL,AH
-   XOR AH,AH
+ IDENTIFICAR_PIXEL1 PROC NEAR
+   MOV AX,[SI]         ;la lectura presentada tomando como ejemplo un 08h es 
+   CMP AH,0                     ;presentada en AX de la siguiente manera: 0800h
+   JE @@SEGUIR
    
+   MOV AL,AH          
+   XOR AH,AH           ;por lo que intercambiamos AH con AL y borramos AH
+   JMP @@SEGUIR2
    
-    CMP AX,0
-    JE @@NEGRO
-
+ @@SEGUIR:                      ;para que AL = AX   
+    MOV AL,AH  
 	
-   CALL CONVIERTE2
-   
-   CMP AL,01H
+@@SEGUIR2:	
+    CMP AL,0
+    JE @@NEGRO
+	
+   CALL CONVIERTE2        ;LLAMA A CONVIERTE PARA DIVIDIR EN 2 PIXELES DIFERENTES LOA 4 BYTES
+    
+    CMP AL,0
+    JE @@NEGRO
+	CMP AL,01H
    JE @@AZUL
    CMP AL,02H
    JE @@VERDE
@@ -176,17 +200,16 @@ PROC IDENTIFICAR_PIXEL1 NEAR
    JE @@CYANN
    CMP AL,0CH
    JE @@ROJOO
-   CMP AL,0DH
-   JE @@MAGENTAA   
    CMP AL,0EH
-   JE @@AMARILLO     
+   JE @@AMARILLO  
+   CMP AL,0DH   
+   JE @@MAGENTAA   
    CMP AL,0FH
    JE @@BLANCO   
    JMP @@FIN
 
-@@NEGRO:  
-   MOV AL,00h
-   CALL DESPLEGAR
+@@NEGRO: 
+   CALL NEGRO
    JMP @@FIN
    
 @@AZUL:  
@@ -228,6 +251,11 @@ PROC IDENTIFICAR_PIXEL1 NEAR
    MOV AL,07h 
    CALL DESPLEGAR   ;cambia con gris 
    JMP @@FIN 
+   
+@@AMARILLO:  
+   MOV AL,0Bh
+   CALL DESPLEGAR   ;cambia con light cyan
+   JMP @@FIN    
 
 @@AZULL:  
    MOV AL,0Ch
@@ -254,11 +282,6 @@ PROC IDENTIFICAR_PIXEL1 NEAR
    CALL DESPLEGAR   
    JMP @@FIN  
 
-@@AMARILLO:  
-   MOV AL,0Bh
-   CALL DESPLEGAR   ;cambia con light cyan
-   JMP @@FIN    
-
 @@BLANCO:  
    MOV AL,0Fh
    CALL DESPLEGAR   
@@ -268,267 +291,288 @@ PROC IDENTIFICAR_PIXEL1 NEAR
    RET
 ENDP
 ;----------------------------------------------------------------------------
-PROC IDENTIFICAR_PIXEL2 NEAR
-   MOV AX,[SI]
-   MOV AL,AH
+ NEGRO PROC NEAR
    XOR AH,AH
-   
-   
-    CMP AX,0
-    JE @@NEGRO
+   MOV [PIXEL1],AH      ;EN EL ESO CONVIERTE2 SE CARGAN LOS VALORES DE PIXEL1 Y PIXEL2
+   MOV [PIXEL2],AH      ;SIN EMBARGO, SI TENEMOS COLOR NEGRO, NOS ESTAMOS BRINCANDO CONVIERTE2
+   MOV AL,00h           ;POR LO QUE SE NECESITA ASIGNARLE VALOR A LAS VARIABLES MANUALMENTE
+   CALL DESPLEGAR
+   RET
+ENDP
+;----------------------------------------------------------------------------
 
-  
-   CMP AH,01H
-   JE @@AZUL
-   CMP AH,02H
-   JE @@VERDE
-   CMP AH,03H
-   JE @@CYAN
-   CMP AH,04H
-   JE @@ROJO
-   CMP AH,05H
-   JE @@MAGENTA
-   CMP AH,06H
-   JE @@CAFE   
-   CMP AH,07H
-   JE @@GRIS   
-   CMP AH,08H
-   JE @@GRISS    
-   CMP AH,09H   
-   JE @@AZULL
-   CMP AH,0AH
-   JE @@VERDEE
-   CMP AH,0BH
-   JE @@CYANN
-   CMP AH,0C0H
-   JE @@ROJOO
-   CMP AH,0DH
-   JE @@MAGENTAA   
-   CMP AH,0EH
-   JE @@AMARILLO     
-   CMP AH,0FH
-   JE @@BLANCO   
-   JMP @@FIN
+ IDENTIFICAR_PIXEL2 PROC NEAR
+    MOV AL,[PIXEL2]     ;DESPLEGAR EL PIXEL 2, YA VIENE EL AX DIVIDO DE IDENTIFICAR_PIXEL1
 
-@@NEGRO:  
+    CMP AL,0
+    JE @@NEGRO2
+
+   CMP AL,01H
+   JE @@AZUL2
+   CMP AL,02H
+   JE @@VERDE2
+   CMP AL,03H
+   JE @@CYAN2
+   CMP AL,04H
+   JE @@ROJO2
+   CMP AL,05H
+   JE @@MAGENTA2
+   CMP AL,06H
+   JE @@CAFE2   
+   CMP AL,07H
+   JE @@GRIS2   
+   CMP AL,08H
+   JE @@GRISS2    
+   
+   JMP @@FIN2
+
+@@NEGRO2:  
    MOV AL,00h
    CALL DESPLEGAR
-   JMP @@FIN
+   JMP @@FIN2
    
-@@AZUL:  
+@@AZUL2:  
    MOV AL,04h
    CALL DESPLEGAR    ;azul cambia a rojo
-   JMP @@FIN
+   JMP @@FIN2
    
-@@VERDE:  
+@@VERDE2:  
    MOV AL,02h
    CALL DESPLEGAR   
-   JMP @@FIN
+   JMP @@FIN2
 
-@@CYAN:  
+@@CYAN2:  
    MOV AL,06h
    CALL DESPLEGAR   ;cambia con cafe
-   JMP @@FIN
+   JMP @@FIN2
    
- @@ROJO:  
+ @@ROJO2:  
    MOV AL,01h
    CALL DESPLEGAR   ;cambia con azul
-   JMP @@FIN  
+   JMP @@FIN2  
    
-@@MAGENTA:  
+@@MAGENTA2:  
    MOV AL,05h
    CALL DESPLEGAR   
-   JMP @@FIN   
+   JMP @@FIN2   
    
-@@CAFE:  
+@@CAFE2:  
    MOV AL,03h
    CALL DESPLEGAR   ;cambia con cyan
-   JMP @@FIN   
+   JMP @@FIN2   
    
-@@GRIS:  
+@@GRIS2:  
    MOV AL,08h
    CALL DESPLEGAR   ;cambia con gris claro
-   JMP @@FIN 
+   JMP @@FIN2 
  
-@@GRISS:  
+@@GRISS2:  
    MOV AL,07h
    CALL DESPLEGAR   
-   JMP @@FIN 
-
-@@AZULL:  
-   MOV AL,0Ch
-   CALL DESPLEGAR   ;CAMBIA CON ROJO CLARO
-   JMP @@FIN 
- 
-@@VERDEE:  
-   MOV AL,0Ah
-   CALL DESPLEGAR   
-   JMP @@FIN 
- 
-@@CYANN:  
-   MOV AL,0Eh
-   CALL DESPLEGAR   ;cambia con amarillo
-   JMP @@FIN 
- 
- @@ROJOO:  
-   MOV AL,09h
-   CALL DESPLEGAR   ;CAMBIA CON ROJO CLARO
-   JMP @@FIN  
-   
-@@MAGENTAA:  
-   MOV AL,0Dh
-   CALL DESPLEGAR   
-   JMP @@FIN  
-
-@@AMARILLO:  
-   MOV AL,0Bh
-   CALL DESPLEGAR   ;cambia con light cyan
-   JMP @@FIN    
-
-@@BLANCO:  
-   MOV AL,0Fh
-   CALL DESPLEGAR   
-   JMP @@FIN  
+   JMP @@FIN2 
   
-@@FIN:
+@@FIN2:
    RET
 ENDP
 ;----------------------------------------------------------------------------
-PROC DESPLEGAR NEAR
+
+ IDENTIFICAR_PIXEL2_X PROC NEAR
+    MOV AL,[PIXEL2]
+
+   CMP AL,09H 	
+   JE @@AZULL2
+   CMP AL,0AH
+   JE @@VERDEE2
+   CMP AL,0BH
+   JE @@CYANN2
+   CMP AL,0C0H
+   JE @@ROJOO2
+   CMP AL,0DH
+   JE @@MAGENTAA2   
+   CMP AL,0EH
+   JE @@AMARILLO2     
+   CMP AL,0FH
+   JE @@BLANCO2   
+   JMP @@FIN7
+
+
+@@AZULL2:  
+   MOV AL,0Ch
+   CALL DESPLEGAR   ;CAMBIA CON ROJO CLARO
+   JMP @@FIN7 
+ 
+@@VERDEE2:  
+   MOV AL,0Ah
+   CALL DESPLEGAR   
+   JMP @@FIN7 
+ 
+@@CYANN2:  
+   MOV AL,0Eh
+   CALL DESPLEGAR   ;cambia con amarillo
+   JMP @@FIN7 
+ 
+ @@ROJOO2:  
+   MOV AL,09h
+   CALL DESPLEGAR   ;CAMBIA CON ROJO CLARO
+   JMP @@FIN7  
+   
+@@MAGENTAA2:  
+   MOV AL,0Dh
+   CALL DESPLEGAR   
+   JMP @@FIN7  
+
+@@AMARILLO2:  
+   MOV AL,0Bh
+   CALL DESPLEGAR   ;cambia con light cyan
+   JMP @@FIN7    
+
+@@BLANCO2:  
+   MOV AL,0Fh
+   CALL DESPLEGAR   
+   JMP @@FIN7  
+  
+@@FIN7:
+   RET
+ENDP
+;----------------------------------------------------------------------------
+
+ DESPLEGAR PROC NEAR
 ;INT 10 - Escribir pixel.
 ;
-;Par metros: AH = 0Ch
-;            AL = color (ver m s abajo las constantes de color)
-;            BH = n£mero de p gina (0 si se desconoce la p gina actual)
-;            CX = columna (depende del modo gr fico)
-;            DX = fila (depende del modo gr fico)
+;ParÂ metros: AH = 0Ch
+;            AL = color (ver mÂ s abajo las constantes de color)
+;            BH = nÂ£mero de pÂ gina (0 si se desconoce la pÂ gina actual)
+;            CX = columna (depende del modo grÂ fico)
+;            DX = fila (depende del modo grÂ fico)
 
    PUSH BX
    PUSH DX
+   PUSH AX
    MOV AH,0CH
    XOR BH,BH
    INT 10H
+   POP AX
    POP DX
    POP BX
    RET
 ENDP
 ;----------------------------------------------------------------------------
-PROC GotoXY NEAR
+ GotoXY PROC NEAR
 
       MOV  AH, 2                  ;Servicio para posicionar cursor.
       MOV  BH, 0                  ;BH = 0 : p gina de video.
       INT  10H                    ;Servicios de video del BIOS.
-   @@Fin:
+
       RET
 ENDP; GotoXY.
 
 ;----------------------------------------------------------------------------
-PROC AbrirArchivo NEAR
+ AbrirArchivo PROC NEAR
 
       MOV DX,OFFSET ARCHIVO
       MOV  AH, 3DH                ;Servicio para abrir archivo.
       MOV  AL, 2                  ;Modo de apertura: lectura/escritura.
       INT  21H                    ;Servicios del DOS.
-   @@Fin:
       MOV  [ Handler ], AX        ;Retornado por la interrupcion.
       RET
 ENDP; AbrirArchivo.
 ;----------------------------------------------------------------------------
-PROC LEER NEAR
-   MOV DX,OFFSET SALVE+2
-   MOV CX,117
+ LEER PROC NEAR
+   MOV DX,OFFSET SALVE        ;El byte 10 del header indica en que byte empieza el array de pixeles
+   MOV CX,116                 ;este valor es fijo y se define que empiezan siempre a partir de este   
+   MOV BX,[HANDLER]
    CALL LeerDeArchivo16Bits
-                             ;HASTA ACA ESTAMOS LEYENDO SOLO EL HEADER 
+                                         ;HASTA ACA ESTAMOS LEYENDO SOLO EL HEADER 
 							  
    CALL TAMANO
    CALL TAMANO2
    CALL CONVERTIR
    CALL DIVIDE2 
-     
 
    MOV DX,[ALTO_NUM] ;VALOR DE FILA 
-@@CICLO:							
+@@CICLO:				                          ;CICLO DONDE VA A DESPLEGAR LAS 480 FILAS			
 						 
    PUSH DX
-   
-   MOV DX,OFFSET CONTENIDO+2
+
+   MOV DX,OFFSET CONTENIDO
    MOV CX,[ANCHO_NUM]
+   MOV BX,[HANDLER]
    CALL LeerDeArchivo16Bits
    
    MOV DX,[ALTO_NUM] ;VALOR DE FILA                               ;LEEMOS EL HEADER MAS LA 1ERA FILA
    CALL CURSOR
    
+
    POP DX
    DEC DX
-   mov [ALTO_NUM],DX
+   MOV [ALTO_NUM],DX
    CMP DX,0
    JA @@CICLO
    
       RET
 ENDP; .
 ;----------------------------------------------------------------------------
-PROC LeerDeArchivo16Bits NEAR
+ LeerDeArchivo16Bits PROC NEAR
       PUSH DX
-
+      PUSH BX
       MOV  AH, 3FH                ;Servicio para leer de archivo.
-      MOV BX,[HANDLER]
       INT  21H                    ;Servicios del DOS.
-   @@Fin:
    
+   POP BX
    POP DX
       RET
 ENDP; LeerDeArchivo16Bits.
 ;----------------------------------------------------------------------------
-PROC TAMANO NEAR
+ TAMANO PROC NEAR
 
-;PROCESO QUE LEE EL ANCHO DEL ARCHIVO
+;LEEMOS EL ANCHO DEL ARCHIVO
 
-   MOV ESI,OFFSET SALVE 
-   MOV EDI, OFFSET ANCHO
-   ADD ESI,23
-   MOV CX,23
+   MOV SI,OFFSET SALVE 
+   MOV DI, OFFSET ANCHO
+   ADD SI,21          ; 20 al 23 se lee ancho en la cabecera
+   MOV CX,21
 
-@@CICLO:     
-   MOV AL,[ESI]
-   MOV [EDI],AL
-   DEC ESI
-   INC EDI
+@@CICLO8:     
+   MOV AL,[SI]
+   MOV [DI],AL
+   DEC SI
+   INC DI
    DEC CX
-   CMP CX,20
-   JAE @@CICLO
+   CMP CX,18
+   JAE @@CICLO8
    
       RET
 ENDP; .
 ;----------------------------------------------------------------------------
-PROC TAMANO2 NEAR
+ TAMANO2 PROC NEAR
 
-;PROCESO QUE LEE EL ALTO DEL ARCHIVO
+;LEEMOS EL ALTO DEL ARCHIVO
 
-   MOV ESI,OFFSET SALVE 
-   MOV EDI, OFFSET ALTO
-   ADD ESI,27
-   MOV CX,27
+   MOV SI,OFFSET SALVE 
+   MOV DI, OFFSET ALTO
+   ADD SI,25
+   MOV CX,25
 
-@@CICLO:     
-   MOV AL,[ESI]
-   MOV [EDI],AL
-   DEC ESI
-   INC EDI
+@@CICLO3:     
+   MOV AL,[SI]
+   MOV [DI],AL
+   DEC SI
+   INC DI
    DEC CX
-   CMP CX,23
-   JAE @@CICLO
+   CMP CX,22
+   JAE @@CICLO3
    
       RET
 ENDP; .
 ;----------------------------------------------------------------------------
-PROC CONVERTIR NEAR
-    MOV ESI,OFFSET ANCHO
-    MOV EDI,OFFSET ANCHO_NUM        
+ CONVERTIR PROC NEAR
+    MOV SI,OFFSET ANCHO       ;LLAMAMOS A ALTO Y ANCHO PARA CONVERTIRLOS EN NUMERO
+    MOV DI,OFFSET ANCHO_NUM        
 	
 	CALL CONVERTIR3
       
-    MOV ESI,OFFSET ALTO
-    MOV EDI,OFFSET ALTO_NUM        
+    MOV SI,OFFSET ALTO
+    MOV DI,OFFSET ALTO_NUM        
 	
 	CALL CONVERTIR3
 
@@ -537,42 +581,33 @@ PROC CONVERTIR NEAR
 ENDP; .
 
 ;----------------------------------------------------------------------------
-PROC CONVERTIR3 NEAR
+ CONVERTIR3 PROC NEAR
 
-      MOV  AL, [ ESI + 2 ]                         
-      MOV  AH, 0                  
-      IMUL AX, 256               
-      MOV  [ EDI ], AX            
-      MOV  AL, [ ESI + 3 ]                         
+;CONVERTIMOS VALORES DEL ALTO Y ANCHO A NUMERO
+
+      MOV  AL, [ SI + 2 ]                         
+      MOV  AH, 0 
+      MOV BX,256	  
+      MUL BX              
+      MOV  [ DI ], AX            
+      MOV  AL, [ SI + 3 ]                         
                
-      ADD [ EDI ], AL         
+      ADD [ DI ], AL         
 
       RET
 ENDP; .
 ;----------------------------------------------------------------------------
-PROC EscribirEnArchivo16Bits NEAR
+ EscribirEnArchivo16Bits PROC NEAR
    PUSH BX
       MOV AH,40H
       MOV BX,[ Handler2 ]
-;      MOV DX,OFFSET FRASE+2
       INT  21H                    ;Servicios del DOS.
-   ;Verificar si los datos fueron guardados.
-      CMP AX,CX
-      JE  @@Fin
-   ;Mensaje de error.
-   ;   MOV  DX, OFFSET MSJError
-    ;  CALL Cout
-    
-@@Fin:
- ;     MOV DX,OFFSET MSJ2  ;Se cargo con exito, y espera una tecla para
- ;     CALL COUT           ;salir.
-  ;    MOV AH,01H
- ;     INT 21H
+
     POP BX
       RET
 ENDP; EscribirEnArchivo16Bits.
 ;----------------------------------------------------------------------------
-PROC Cerrar NEAR
+ Cerrar PROC NEAR
       MOV  AH, 3EH                ;Servicio para cerrar archivo.
       MOV BX,[ Handler ]
       INT  21H                    ;Servicios del DOS.
@@ -580,379 +615,36 @@ PROC Cerrar NEAR
 ENDP
 
 ;----------------------------------------------------------------------------
-PROC AbrirArchivo2 NEAR
+ AbrirArchivo2 PROC NEAR
 
       MOV DX,OFFSET ARCHIVO2
       MOV  AH, 3DH                ;Servicio para abrir archivo.
       MOV  AL, 2                  ;Modo de apertura: lectura/escritura.
       INT  21H                    ;Servicios del DOS.
-   @@Fin:
       MOV  [ Handler2 ], AX        ;Retornado por la interrupcion.
       RET
 ENDP; AbrirArchivo.
 ;----------------------------------------------------------------------------
-PROC LEER2 NEAR
-   MOV DX,OFFSET SALVE+2
-   MOV CX,117
-   CALL LeerDeArchivo16Bits
-                             ;HASTA ACA ESTAMOS LEYENDO SOLO EL HEADER 
-							  
-   CALL TAMANO
-   CALL TAMANO2
-   CALL CONVERTIR
-   CALL DIVIDE2 
-     
-
-   MOV DX,[ALTO_NUM] ;VALOR DE FILA 
-@@CICLO:							
-						 
-   PUSH DX
-   
-   MOV DX,OFFSET CONTENIDO+2
-   MOV CX,[ANCHO_NUM]
-   CALL LeerDeArchivo16Bits
-   
-   MOV DX,[ALTO_NUM] ;VALOR DE FILA                               ;LEEMOS EL HEADER MAS LA 1ERA FILA
-   CALL CURSOR2
-   
-   POP DX
-   DEC DX
-   mov [ALTO_NUM],DX
-   CMP DX,0
-   JA @@CICLO
-   
-      RET
-ENDP; .
-;----------------------------------------------------------------------------
-PROC CURSOR2 NEAR
-   
-   XOR CX,CX  ; EMPEZAR EN COLUMNA 0
-   XOR BX,BX
-   MOV SI,OFFSET CONTENIDO
-
-
-   MOV DX,OFFSET CAMBIO   
-   MOV BX,[ Handler2]                        
-   CALL CAMBIO_LINEA 
-
-@@CICLO2: 
-  CALL IDENTIFICAR_PIXEL3
-  CALL IDENTIFICAR_PIXEL4  
-  INC CX
-  INC BX
-  INC SI
-;  CALL SEEK
-  CMP BX,[ANCHO_NUM]
-  JBE @@CICLO2
-  
-
-@@FIN:
-   RET
-ENDP
-;----------------------------------------------------------------------------
-PROC IDENTIFICAR_PIXEL3 NEAR
-   MOV AX,[SI]
-   MOV AL,AH
-   XOR AH,AH
-   
-   
-    CMP AX,0
-    JE @@NEGRO
-
-	
-   CALL CONVIERTE2
-   
-   CMP AL,01H
-   JE @@AZUL
-   CMP AL,02H
-   JE @@VERDE
-   CMP AL,03H
-   JE @@CYAN
-   CMP AL,04H
-   JE @@ROJO
-   CMP AL,05H
-   JE @@MAGENTA
-   CMP AL,06H
-   JE @@CAFE   
-   CMP AL,07H
-   JE @@GRIS   
-   CMP AL,08H
-   JE @@GRISS    
-   CMP AL,09H   
-   JE @@AZULL
-   CMP AL,0AH
-   JE @@VERDEE
-   CMP AL,0BH
-   JE @@CYANN
-   CMP AL,0CH
-   JE @@ROJOO
-   CMP AL,0DH
-   JE @@MAGENTAA   
-   CMP AL,0EH
-   JE @@AMARILLO     
-   CMP AL,0FH
-   JE @@BLANCO   
-   JMP @@FIN
-
-@@NEGRO:  
-   MOV DX, OFFSET A0
-   CALL EscribirEnArchivo16Bits
-   JMP @@FIN
-   
-@@AZUL:  
-   MOV DX, OFFSET A1
-   CALL EscribirEnArchivo16Bits
-   JMP @@FIN
-   
-@@VERDE:  
-   MOV DX, OFFSET A2
-   CALL EscribirEnArchivo16Bits
-   JMP @@FIN
-
-@@CYAN:  
-   MOV DX, OFFSET A3
-   CALL EscribirEnArchivo16Bits
-   JMP @@FIN
-   
- @@ROJO:  
-   MOV DX, OFFSET A4
-   CALL EscribirEnArchivo16Bits
-   JMP @@FIN  
-   
-@@MAGENTA:  
-   MOV DX, OFFSET A5
-   CALL EscribirEnArchivo16Bits 
-   JMP @@FIN   
-   
-@@CAFE:  
-   MOV DX, OFFSET A6
-   CALL EscribirEnArchivo16Bits
-   JMP @@FIN   
-   
-@@GRIS:  
-   MOV DX, OFFSET A7
-   CALL EscribirEnArchivo16Bits
-   JMP @@FIN 
- 
-@@GRISS:  
-   MOV DX, OFFSET A8
-   CALL EscribirEnArchivo16Bits
-   JMP @@FIN 
-
-@@AZULL:  
-   MOV DX, OFFSET A9
-   CALL EscribirEnArchivo16Bits
-   JMP @@FIN 
- 
-@@VERDEE:  
-   MOV DX, OFFSET A10
-   CALL EscribirEnArchivo16Bits 
-   JMP @@FIN 
- 
-@@CYANN:  
-   MOV DX, OFFSET A11
-   CALL EscribirEnArchivo16Bits
-   JMP @@FIN 
- 
- @@ROJOO:  
-   MOV DX, OFFSET A12
-   CALL EscribirEnArchivo16Bits
-   JMP @@FIN  
-   
-@@MAGENTAA:  
-   MOV DX, OFFSET A13
-   CALL EscribirEnArchivo16Bits 
-   JMP @@FIN  
-
-@@AMARILLO:  
-   MOV DX, OFFSET A14
-   CALL EscribirEnArchivo16Bits
-   JMP @@FIN    
-
-@@BLANCO:  
-   MOV DX, OFFSET A15
-   CALL EscribirEnArchivo16Bits 
-   JMP @@FIN  
-  
-@@FIN:
-   RET
-ENDP
-;----------------------------------------------------------------------------
-PROC IDENTIFICAR_PIXEL4 NEAR
-   MOV AX,[SI]
-   MOV AL,AH
-   XOR AH,AH
-   
-   
-    CMP AX,0
-    JE @@NEGRO
-
-  
-   CMP AH,01H
-   JE @@AZUL
-   CMP AH,02H
-   JE @@VERDE
-   CMP AH,03H
-   JE @@CYAN
-   CMP AH,04H
-   JE @@ROJO
-   CMP AH,05H
-   JE @@MAGENTA
-   CMP AH,06H
-   JE @@CAFE   
-   CMP AH,07H
-   JE @@GRIS   
-   CMP AH,08H
-   JE @@GRISS    
-   CMP AH,09H   
-   JE @@AZULL
-   CMP AH,0AH
-   JE @@VERDEE
-   CMP AH,0BH
-   JE @@CYANN
-   CMP AH,0C0H
-   JE @@ROJOO
-   CMP AH,0DH
-   JE @@MAGENTAA   
-   CMP AH,0EH
-   JE @@AMARILLO     
-   CMP AH,0FH
-   JE @@BLANCO   
-   JMP @@FIN
-
-@@NEGRO:  
-   MOV DX, OFFSET A0
-   CALL EscribirEnArchivo16Bits 
-   JMP @@FIN
-   
-@@AZUL:  
-   MOV DX, OFFSET A1
-   CALL EscribirEnArchivo16Bits 
-   JMP @@FIN
-   
-@@VERDE:  
-   MOV DX, OFFSET A2
-   CALL EscribirEnArchivo16Bits   
-   JMP @@FIN
-
-@@CYAN:  
-   MOV DX, OFFSET A3
-   CALL EscribirEnArchivo16Bits 
-   JMP @@FIN
-   
- @@ROJO:  
-   MOV DX, OFFSET A4
-   CALL EscribirEnArchivo16Bits 
-   JMP @@FIN  
-   
-@@MAGENTA:  
-   MOV DX, OFFSET A5
-   CALL EscribirEnArchivo16Bits 
-   JMP @@FIN   
-   
-@@CAFE:  
-   MOV DX, OFFSET A6
-   CALL EscribirEnArchivo16Bits 
-   JMP @@FIN   
-   
-@@GRIS:  
-   MOV DX, OFFSET A7
-   CALL EscribirEnArchivo16Bits 
-   JMP @@FIN 
- 
-@@GRISS:  
-   MOV DX, OFFSET A8
-   CALL EscribirEnArchivo16Bits 
-   JMP @@FIN 
-
-@@AZULL:  
-   MOV DX, OFFSET A9
-   CALL EscribirEnArchivo16Bits 
-   JMP @@FIN 
- 
-@@VERDEE:  
-   MOV DX, OFFSET A10
-   CALL EscribirEnArchivo16Bits   
-   JMP @@FIN 
- 
-@@CYANN:  
-   MOV DX, OFFSET A11
-   CALL EscribirEnArchivo16Bits 
-   JMP @@FIN 
- 
- @@ROJOO:  
-   MOV DX, OFFSET A12
-   CALL EscribirEnArchivo16Bits 
-   JMP @@FIN  
-   
-@@MAGENTAA:  
-   MOV DX, OFFSET A3
-   CALL EscribirEnArchivo16Bits 
-   JMP @@FIN  
-
-@@AMARILLO:  
-   MOV DX, OFFSET A14
-   CALL EscribirEnArchivo16Bits 
-   JMP @@FIN    
-
-@@BLANCO:  
-   MOV DX, OFFSET A15
-   CALL EscribirEnArchivo16Bits   
-   JMP @@FIN  
-  
-@@FIN:
-   RET
-ENDP
-;----------------------------------------------------------------------------
-
-;þ DESCRIPCION: Mueve el apuntador interno del archivo: al inicio, al final,
-;               al inicio + un desplazamiento, o a un desplazamiento a partir
-;               de la posici¢n actual.
-;þ PARAMETROS: BX  = handler del archivo.
-;              AL  = 0: moverse al inicio del archivo.
-;                  = 1: moverse al final  del archivo.
-;                  = 2: moverse al inicio + un desplazamiento.
-;                  = 3: moverse un desplazamiento a partir de posici¢n actual.
-;              EDX = desplazamiento ( s¢lo para AL = 2 ¢ 3 ).
-;þ SALIDA: CF = 0 : apuntador exitosamente movido.
-;          CF = 1 : AX = c¢digo de error.
-;þ REGISTROS MODIFICADOS: AX, ECX, DX.
-
-PROC Seek NEAR
-      MOV EDX,1
-      MOV  AL, 1                  ;Subservicio para moverse a pos.actual+desp.
-      MOV  ECX, EDX               ;El servicio recibe el desplazamiento en
-      SHR  ECX, 16                ;CX:DX, as¡ q el word alto de EDX va en CX.
-   @@HacerElSeek:
-      MOV  AH, 42H                ;Servicio para realizar SEEK.
-      INT  21H                    ;Servicios del DOS.
-   @@Fin:
-      RET
-ENDP; Seek
-;----------------------------------------------------------------------------
-
-PROC Cerrar2 NEAR
+ Cerrar2 PROC NEAR
       MOV  AH, 3EH                ;Servicio para cerrar archivo.
-      MOV BX,[ Handler2 ]
+      MOV BX,[ Handler2 ]         ;SE TUVO QUE CREAR OTRO PARA USAR OTRO HANDLER
       INT  21H                    ;Servicios del DOS.
       RET
 ENDP
 
 ;----------------------------------------------------------------------------
-PROC CrearArchivo NEAR
+ CrearArchivo PROC NEAR
  
       MOV  AH, 3CH                 ;Servicio para crear archivo.
       MOV DX, OFFSET ARCHIVO2    
-      MOV  CX, 0000000000100000B  ;Atributos que tendr  el archivo creado.
+      MOV  CX, 0000000000100000B  ;Atributos que tendrÂ  el archivo creado.
       INT  21H                    ;Servicios del DOS.
-   ;Verificar si el archivo fue creado.
-      JNC  @@Fin
-   @@Fin:
+
       MOV  [ Handler2 ], AX        ;Retornado por la interrupcion.
       RET
 ENDP; CrearArchivo.
 ;----------------------------------------------------------------------------
-PROC CAMBIO_LINEA NEAR
+ CAMBIO_LINEA PROC NEAR
     PUSH BX
       MOV CL,2        
       MOV CH,0        
@@ -963,160 +655,668 @@ PROC CAMBIO_LINEA NEAR
       RET
 ENDP
 ;----------------------------------------------------------------------------
-PROC VALIDAR FAR
-        mov si, 80h ;apunta al inicio de la linea de comando
+ LEER2 PROC NEAR             ;PROC LEER2 PARA IMAGEN INVERSA
+   MOV DX,OFFSET SALVE
+   MOV CX,116
+   MOV BX,[HANDLER]
+   CALL LeerDeArchivo16Bits
+                             ;HASTA ACA ESTAMOS LEYENDO SOLO EL HEADER 
+							  
+   CALL TAMANO
+   CALL TAMANO2
+   CALL CONVERTIR
+   CALL DIVIDE2 
+     
 
-        inc si ;quita el espacio blanco que sale de primero en linea de comando
-        inc si ;para revisar que no haya otro espacio en blanco, lo que llevaria a mandar un mensaje
-        mov dl, byte ptr es:[si]
-        cmp dl, 2Fh ;compara el caracter a ver si es un slash
-        je Slash ;si no es igual a un slash 
+   XOR DX,DX ;VALOR DE FILA 
+   MOV [RESETEO],DX          ;PARA EMPEZAR A DESPLEGAR EN 0 EN Y (DE ARRIBA HACIA ABAJO)    
+@@CICLO4:							
+						 
 
-        cmp dl, 20h ;a ver si es un espacio en blanco
-        je Nada
+   PUSH CX
+ 
+   MOV DX,OFFSET CONTENIDO
+   MOV CX,[ANCHO_NUM]
+   MOV BX,[HANDLER]   
+   CALL LeerDeArchivo16Bits
+   
+    
+   MOV DX,[RESETEO]            	;VALOR DE FILA                               ;LEEMOS EL HEADER MAS LA 1ERA FILA
+   CALL CURSOR
+   
+   POP CX
+   MOV DX,[RESETEO]
+   INC DX
+   MOV [RESETEO],DX
 
-        mov di, offset archivo
-    Nombre:
-        mov dl, byte ptr es:[si]
-        mov [di], dl
-        cmp dl, '.'
-        je Nombre2
-        inc di
-        inc si 
-        jmp Nombre
-
-    Nombre2:
-        inc di
-        mov [di], 62h ;le mete una b
-        inc di
-        mov [di], 6Dh ;le mete una m
-        inc di
-        mov [di], 70h ;le mete una p
-        jmp Fin
-
-
-
-    Nada:  
-        mov ah, 09h ;imprime etiqueta de aviso
-        lea dx, etilin
-        int 21h
-
-        mov ah, 09h ;imprime etiqueta de aviso
-        lea dx, nombrebmp
-        int 21h
-
-        CALL RETORNADOS
-
-    Slash:
-        mov ah, 09h ;imprime etiqueta de aviso
-        lea dx, etilin
-        int 21h
-
-        inc si ;para revisar que viene despues del slash
-        mov dl, byte ptr es:[si]
-        cmp dl, 3Fh ;a ver si es un signo de pregunta
-        je Ayudas
-        cmp dl, 48h ;a ver si es igual a H
-        je Ayudas
-        cmp dl, 68h ;a ver si es igual a h
-        je ayudas
-        cmp dl, 41h ;a ver si es igual a una A
-        je Ascii
-        cmp dl, 61h ;a ver si es igual a una a
-        je Ascii
-        cmp dl, 72h ;a ver si es igual a una r
-        je Inverso
-        cmp dl, 69h ;a ver si es igual a una i
-        je Izquierdo
-        cmp dl, 64h ;a ver si es igual a una d
-        je Derecho
-
-    Ayudas:
-        mov ah, 09h
-        lea dx, ayuda
-        int 21h
+   CMP DX,[ALTO_NUM]
+   JBE @@CICLO4
 
 
-        mov ah, 09h ;imprime etiqueta de aviso
-        lea dx, etilin
-        int 21h
-
-        CALL RETORNADOS
-
-    Ascii:
-        mov ah, 09h
-        lea dx, texto
-        int 21h
-
-
-        mov ah, 09h ;imprime etiqueta de aviso
-        lea dx, etilin
-        int 21h
-
-       CALL RETORNADOS
-
-    Inverso:
-        mov ah, 09h
-        lea dx, inversa
-        int 21h
-
-
-        mov ah, 09h ;imprime etiqueta de aviso
-        lea dx, etilin
-        int 21h
-
-        CALL RETORNADOS
-
-    Izquierdo:
-        mov ah, 09h
-        lea dx, izquierda
-        int 21h
-
-
-        mov ah, 09h ;imprime etiqueta de aviso
-        lea dx, etilin
-        int 21h
-
-        CALL RETORNADOS
-
-    Derecho:
-        mov ah, 09h
-        lea dx, derecha
-        int 21h
-
-
-        mov ah, 09h ;imprime etiqueta de aviso
-        lea dx, etilin
-        int 21h
-
-        CALL RETORNADOS
-
-   Fin:
       RET
+ENDP; .
+;----------------------------------------------------------------------------
+ LEER3 PROC NEAR                  ;LEER 3 PARA IMAGEN EN FORMATO ASCII EN EL TXT 
 
+		 CALL CREARARCHIVO
+
+		 XOR AL,AL
+		 MOV BX,[HANDLER]
+		 CALL SeekEnArchivo
+
+         CALL HEADER
+
+         MOV DX,[ALTO_NUM]        ;ALTO_NUM EMPIEZA EN 0 Y VA INCREMENTANDO POR CADA PASADA HACIA ABAJO PARA IR ESCRIBIENDO EN EL TXT
+		 MOV [ALTO_NUM2],DX	          ;ALTO_NUM2 VIENE DE ABAJO HACIA ARRIBA, HASTA LLEGAR A ALTO_NUM, HASTA QUE ALTO_NUM SEA 0
+		 
+@@LOOP:
+
+		 XOR AL,AL
+		 MOV BX,[HANDLER]
+		 CALL SeekEnArchivo
+		 
+
+         CALL HEADER
+         
+		 MOV DX,[ALTO_NUM2]
+		 MOV [ALTO_NUM],DX
+        
+   CALL LEE_ULTIMA_LINEA
+	
+   CALL ESCRIBE_TXT
+	 
+         MOV DX,[ALTO_NUM2]
+		 DEC DX
+		 MOV [ALTO_NUM],DX
+		 MOV [ALTO_NUM2],DX
+		 CMP DX,0
+		 JA @@LOOP
+   RET
+ENDP
+;---------------------------------------------------------------------------- 
+ ESCRIBE_TXT PROC NEAR              ;VAMOS A ESCRIBIR UNA LINEA EN EL ARCHIVO TXT
+
+   XOR CX,CX  ; EMPEZAR EN COLUMNA 0
+   XOR BX,BX
+   MOV SI,OFFSET CONTENIDO
+   
+@@CICLO5: 
+
+  MOV AL,1
+  CALL SeekEnArchivo2               ;MOVERNOS A ALGUN LUGAR EN ESPECIFICO
+  CALL IDENTIFICAR_PIXEL3
+  MOV CL,1     
+  MOV CH,0   
+  CALL EscribirEnArchivo16Bits 
+ 
+  MOV AL,1
+  CALL SeekEnArchivo2
+  CALL IDENTIFICAR_PIXEL4  
+  MOV CL,1     
+  MOV CH,0 
+  CALL EscribirEnArchivo16Bits 
+  
+  INC BX
+  INC SI
+  CMP BX,[ANCHO_NUM]
+  JBE @@CICLO5
+  
+  MOV AL,1
+  CALL SeekEnArchivo2
+
+  MOV DX,OFFSET CAMBIO
+  MOV CL,1     
+  MOV CH,0 
+  CALL EscribirEnArchivo16Bits
+  
+  MOV AL,1
+  CALL SeekEnArchivo2 
+
+   RET
+ENDP
+;---------------------------------------------------------------------------- 
+ LEE_ULTIMA_LINEA PROC NEAR
+
+@@CICLO6:							
+
+   MOV DX,OFFSET CONTENIDO
+   MOV CX,[ANCHO_NUM]
+   MOV BX,[HANDLER]
+   CALL LeerDeArchivo16Bits
+   
+   MOV DX,[ALTO_NUM] ;VALOR DE FILA                               ;LEEMOS EL HEADER MAS LA 1ERA FILA
+   
+   DEC DX
+   MOV [ALTO_NUM],DX                                              ;VAMOS A CREAR LAS 480 FILAS EN EL ARCHIVO TXT EN BLANCO
+   CMP DX,0
+   JA @@CICLO6
+
+   RET
+ENDP
+;---------------------------------------------------------------------------- 
+ HEADER PROC NEAR	            ;LEER EL HEADER CUANDO OCUPAMOS DESPLEGAR ASCII
+   PUSH DX
+
+   MOV DX,OFFSET SALVE
+   MOV CX,116
+   CALL LeerDeArchivo16Bits
+                             ;HASTA ACA ESTAMOS LEYENDO SOLO EL HEADER 
+							  
+   CALL TAMANO
+   CALL TAMANO2
+   CALL CONVERTIR
+ 
+   CALL DIVIDE2 
+
+   POP DX
+   
+   RET
+ENDP
+;----------------------------------------------------------------------------
+ IR_A_PRINCIPIO PROC NEAR                     ;NO SE USO
+PUSH DX
+@@CICLO7:							
+
+   MOV DX,OFFSET CONTENIDO
+   MOV CX,[ANCHO_NUM]
+   CALL LeerDeArchivo16Bits
+   
+   MOV DX,[ALTO_NUM] ;VALOR DE FILA                               ;LEEMOS EL HEADER MAS LA 1ERA FILA
+   
+   DEC DX
+   MOV [ALTO_NUM],DX
+   CMP DX,0
+   JA @@CICLO7
+ POP DX  
+      RET
+ENDP; .
+;----------------------------------------------------------------------------
+
+ IDENTIFICAR_PIXEL3 PROC NEAR
+   MOV AX,[SI]         ;la lectura presentada tomando como ejemplo un 08h es 
+   CMP AH,0                     ;presentada en AX de la siguiente manera: 0800h
+   JE @@SEGUIR3
+   
+   MOV AL,AH          
+   XOR AH,AH           ;por lo que intercambiamos AH con AL y borramos AH
+   JMP @@SEGUIR4
+   
+ @@SEGUIR3:                      ;para que AL = AX   
+    MOV AL,AH  
+	
+@@SEGUIR4:	
+    CMP AL,0
+    JE @@NEGRO3
+	
+   CALL CONVIERTE2          ;VAMOS A CONVERTIR LOS 4 BYTES DEL AX EN LOS 2 PIXELES DISTINTOS
+   
+   CMP AL,0
+   JE @@NEGRO3   
+   CMP AL,01H
+   JE @@AZUL3
+   CMP AL,02H
+   JE @@VERDE3
+   CMP AL,03H
+   JE @@CYAN3
+   CMP AL,04H
+   JE @@ROJO3
+   CMP AL,05H
+   JE @@MAGENTA3
+   CMP AL,06H
+   JE @@CAFE3   
+   CMP AL,07H
+   JE @@GRIS3   
+   CMP AL,08H
+   JE @@GRISS3    
+   CMP AL,09H   
+   JE @@AZULL3
+   CMP AL,0AH
+   JE @@VERDEE3
+   CMP AL,0BH
+   JE @@CYANN3
+   CMP AL,0CH
+   JE @@ROJOO3
+   CMP AL,0DH
+   JE @@MAGENTAA3   
+   CMP AL,0EH
+   JE @@AMARILLO3     
+   CMP AL,0FH
+   JE @@BLANCO3   
+   JMP @@FIN3
+
+@@NEGRO3:  
+   MOV DX, OFFSET A0
+   JMP @@FIN3
+   
+@@AZUL3:  
+   MOV DX, OFFSET A1
+   JMP @@FIN3
+   
+@@VERDE3:  
+   MOV DX, OFFSET A2
+   JMP @@FIN3
+
+@@CYAN3:  
+   MOV DX, OFFSET A3
+   JMP @@FIN3
+   
+ @@ROJO3:  
+   MOV DX, OFFSET A4
+   JMP @@FIN3  
+   
+@@MAGENTA3:  
+   MOV DX, OFFSET A5
+   JMP @@FIN3   
+   
+@@CAFE3:  
+   MOV DX, OFFSET A6
+   JMP @@FIN3   
+   
+@@GRIS3:  
+   MOV DX, OFFSET A7
+   JMP @@FIN3 
+ 
+@@GRISS3:  
+   MOV DX, OFFSET A8
+   JMP @@FIN3 
+
+@@AZULL3:  
+   MOV DX, OFFSET A9
+   JMP @@FIN3 
+ 
+@@VERDEE3:  
+   MOV DX, OFFSET A10
+   JMP @@FIN3 
+ 
+@@CYANN3:  
+   MOV DX, OFFSET A11
+   JMP @@FIN3 
+ 
+ @@ROJOO3:  
+   MOV DX, OFFSET A12
+   JMP @@FIN3  
+   
+@@MAGENTAA3:  
+   MOV DX, OFFSET A13
+  JMP @@FIN3  
+
+@@AMARILLO3:  
+   MOV DX, OFFSET A14
+   JMP @@FIN3    
+
+@@BLANCO3:  
+   MOV DX, OFFSET A15
+   JMP @@FIN3  
+  
+@@FIN3:
+   RET
 ENDP
 ;----------------------------------------------------------------------------
 
+ IDENTIFICAR_PIXEL4 PROC NEAR         ;DESPLEGAR EL SEGUNDO PIXEL EN EL TXT
+    MOV AH,[PIXEL2]   
+
+    CMP AH,0
+    JE @@NEGRO4
+
+   CMP AH,01H
+   JE @@AZUL4
+   CMP AH,02H
+   JE @@VERDE4
+   CMP AH,03H
+   JE @@CYAN4
+   CMP AH,04H
+   JE @@ROJO4
+   CMP AH,05H
+   JE @@MAGENTA4
+   CMP AH,06H
+   JE @@CAFE4   
+   CMP AH,07H
+   JE @@GRIS4   
+   CMP AH,08H
+   JE @@GRISS4    
+   CMP AH,09H   
+   JE @@AZULL4
+   CMP AH,0AH
+   JE @@VERDEE4
+   CMP AH,0BH
+   JE @@CYANN4
+   CMP AH,0C0H
+   JE @@ROJOO4
+   CMP AH,0DH
+   JE @@MAGENTAA4   
+   CMP AH,0EH
+   JE @@AMARILLO4     
+   CMP AH,0FH
+   JE @@BLANCO4   
+   JMP @@FIN4
+
+@@NEGRO4:  
+   MOV DX, OFFSET A0
+   JMP @@FIN4
+   
+@@AZUL4:  
+   MOV DX, OFFSET A1
+   JMP @@FIN4
+   
+@@VERDE4:  
+   MOV DX, OFFSET A2
+   JMP @@FIN4
+
+@@CYAN4:  
+   MOV DX, OFFSET A3
+   JMP @@FIN4
+   
+ @@ROJO4:  
+   MOV DX, OFFSET A4
+   JMP @@FIN4  
+   
+@@MAGENTA4:  
+   MOV DX, OFFSET A5
+   JMP @@FIN4   
+   
+@@CAFE4:  
+   MOV DX, OFFSET A6
+   JMP @@FIN4   
+   
+@@GRIS4:  
+   MOV DX, OFFSET A7
+   JMP @@FIN4 
+ 
+@@GRISS4:  
+   MOV DX, OFFSET A8
+   JMP @@FIN4 
+
+@@AZULL4:  
+   MOV DX, OFFSET A9
+   JMP @@FIN4 
+ 
+@@VERDEE4:  
+   MOV DX, OFFSET A10
+   JMP @@FIN4 
+ 
+@@CYANN4:  
+   MOV DX, OFFSET A11
+   JMP @@FIN4 
+ 
+ @@ROJOO4:  
+   MOV DX, OFFSET A12
+   JMP @@FIN4  
+   
+@@MAGENTAA4:  
+   MOV DX, OFFSET A13
+   JMP @@FIN4  
+
+@@AMARILLO4:  
+   MOV DX, OFFSET A14
+   JMP @@FIN4    
+
+@@BLANCO4:  
+   MOV DX, OFFSET A15
+  JMP @@FIN4  
+  
+@@FIN4:
+   RET
+ENDP
+;----------------------------------------------------------------------------
+ SeekEnArchivo PROC NEAR
+
+      MOV  CX, 0                  
+      MOV  DX, 0                           
+
+      MOV  AH, 42H               
+      INT  21H                    
+      RET
+ENDP; SeekEnArchivo.
+;----------------------------------------------------------------------------
+ SeekEnArchivo2 PROC NEAR
+      CMP  AL, 1
+      JE   @@Final
+      CMP  AL, 2
+      JE   @@InicioDesplazamiento
+      CMP  AL, 3
+      JE   @@Desplazamiento
+   @@Inicio:
+      MOV  CX, 0                  
+      MOV  DX, 0                  
+      JMP  @@HacerElSeek
+   @@Final:
+      MOV  AL, 2                  
+      MOV  CX, 0                  
+      MOV  DX, 0                  
+      JMP  @@HacerElSeek
+   @@InicioDesplazamiento:
+          
+      JMP  @@HacerElSeek
+   @@Desplazamiento:
+
+   @@HacerElSeek:
+      MOV  AH, 42H               
+      INT  21H                    
+
+      RET
+ENDP; SeekEnArchivo.
+;---------------------------------------------------------------------------- 
+
+RetornaDOS Macro
+    mov ax, 4c00h
+    int 21h
+EndM
+;---------------------------------------------------------------------------- 
+AYUDAR PROC FAR                                         ;ESTE PROC ES DONDE VA A DESPLEGAR TODAS LAS AYUDAS
+        MOV AH, 09H ;imprime etiqueta de aviso
+        LEA DX, ETILIN 
+        INT 21H
+
+        MOV AH, 09H
+        LEA DX, AYUDA1
+        INT 21H
+
+        MOV AH, 09H ;imprime etiqueta de aviso
+        LEA DX, ETILIN 
+        INT 21H
+
+        MOV AH, 09H
+        LEA DX, AYUDA2
+        INT 21H
+
+        MOV AH, 09H ;imprime etiqueta de aviso
+        LEA DX, ETILIN 
+        INT 21H
+
+        MOV AH, 09H
+        LEA DX, AYUDA3
+        INT 21H
+
+        MOV AH, 09H
+        LEA DX, AYUDA4
+        INT 21H
+
+        MOV AH, 09H ;imprime etiqueta de aviso
+        LEA DX, ETILIN 
+        INT 21H
+
+        MOV AH, 09H
+        LEA DX, AYUDA5
+        INT 21H
+
+        MOV AH, 09H
+        LEA DX, AYUDA6
+        INT 21H
+
+        MOV AH, 09H
+        LEA DX, AYUDA7
+        INT 21H
+
+        MOV AH, 09H ;imprime etiqueta de aviso
+        LEA DX, ETILIN 
+        INT 21H
+
+        MOV AH, 09H
+        LEA DX, AYUDA8
+        INT 21H
+
+        MOV AH, 09H
+        LEA DX, AYUDA9
+        INT 21H
+
+        MOV AH, 09H
+        LEA DX, AYUDA10
+        INT 21H
+
+        MOV AH, 09H ;imprime etiqueta de aviso
+        LEA DX, ETILIN 
+        INT 21H
+
+        MOV AH, 09H
+        LEA DX, AYUDA11
+        INT 21H
+
+        MOV AH, 09H
+        LEA DX, AYUDA12
+        INT 21H
+
+        MOV AH, 09H
+        LEA DX, AYUDA13
+        INT 21H
+
+        MOV AH, 09H ;imprime etiqueta de aviso
+        LEA DX, ETILIN 
+        INT 21H
+
+        RET
+EndP
+;----------------------------------------------------------------------------
+VALIDAR PROC FAR
+        MOV SI, 80H ;apunta al inicio de la linea de comando
+
+        INC SI ;quita el espacio blanco que sale de primero en linea de comando
+        INC SI ;para revisar lo que hay despues del espacio en blanco
+
+        MOV DI, OFFSET ARCHIVO
+        
+
+
+    NOMBRE:                         ;VA A IR MOVIENDO A ARCHIVO EL NOMBRE DE LA IMAGEN
+        ;CMP DL, 0
+        ;JE AYUDAS2
+        MOV DL, BYTE PTR ES:[SI]
+        MOV [DI], DL
+        CMP DL, '.'
+        JE NOMBRE2
+        CMP DL, 0
+        JE AYUDAS2
+        INC DI
+        INC SI 
+        JMP NOMBRE
+
+    NOMBRE2:                        ;VA A MOVER A ARCHIVO EL '.BMP' FINAL DE LA IMAGEN
+        INC DI
+        MOV DL, 62H
+        MOV [DI], DL ;le mete una b
+        INC DI
+        MOV DL, 6DH
+        MOV [DI], DL; ;le mete una m
+        INC DI
+        MOV DL, 70H
+        MOV [DI], DL ;le mete una p
+
+        INC SI                      ;INCREMENTA 3 PARA AVANZAR A VER LO QUE VIENE DESPUES DEL NOMBRE DE LA IMAGEN
+        INC SI
+        INC SI
+
+        INC SI ;quita el espacio blanco que sale de primero en linea de comando
+        INC SI ;para revisar lo que hay despues del espacio en blanco
+        MOV DL, BYTE PTR ES:[SI]
+        CMP DL, 2FH ;compara el caracter a ver si es un slash
+        JE SLASH ;si no es igual a un slash 
+
+        JMP IMAGEN                  ;BRINCAMOS A DESPLEGAR LA IMAGEN 
+
+    AYUDAS2:
+
+        CALL AYUDAR                 ;LLAMAMOS PARA DESPLEGAR LAS AYUDAS
+
+        RetornaDOS
+
+    SLASH:
+        MOV AH, 09H
+        LEA DX, ETILIN
+        INT 21H
+
+        INC SI ;para revisar que viene despues del slash
+        MOV DL, BYTE PTR ES:[SI]
+        CMP DL, 3FH ;a ver si es un signo de pregunta
+        JE AYUDAS
+        CMP DL, 48H ;a ver si es igual a H
+        JE AYUDAS
+        CMP DL, 68H ;a ver si es igual a h
+        JE AYUDAS
+        CMP DL, 41H ;a ver si es igual a una A
+        JE ASCII
+        CMP DL, 61H ;a ver si es igual a una a
+        JE ASCII
+        CMP DL, 72H ;a ver si es igual a una r
+        JE INVERSO
+
+    AYUDAS:
+        
+        CALL AYUDAR                 ;LLAMAMOS PARA DESPLEGAR LAS AYUDAS
+
+        RetornaDOS
+
+    ASCII:
+        JMP TXT                     ;BRINCAMOS A DESPLEGAR LA IMAGEN EN TXT
+
+
+    INVERSO:
+        JMP INVERTIDA               ;BRINCAMOS A DESPLEGAR LA IMAGEN INVERTIDA
+
+        RetornaDOS
+
+ENDP
+
+;---------------------------------------------------------------------------- 
+
 INICIO:
-         MOV AX,DATOS
+         MOV AX,datos
          MOV DS,AX
          
-		 CALL VALIDAR
-       CALL VIDEO
-		 CALL ABRIRARCHIVO
-         CALL Leer
 
+        CALL VALIDAR
 
-		 ;CALL ABRIRARCHIVO2
-		 ;CALL CREARARCHIVO
-		 
-		 ;CALL LEER2
-		 CALL CERRAR
-		 ;CALL CERRAR2		 
+        IMAGEN:
+          CALL VIDEO
+		      CALL ABRIRARCHIVO
+          CALL Leer
 
-         MOV AH,4CH
-         MOV AL,0
-         INT 21H
+		      CALL CERRAR
+
+		      JMP @@FIN5
+
+        INVERTIDA:
+          CALL VIDEO
+		      CALL ABRIRARCHIVO
+          CALL Leer2
+
+		      CALL CERRAR
+
+		      JMP @@FIN5
+
+        TXT:
+		      CALL ABRIRARCHIVO
+          CALL Leer3
+
+		      CALL CERRAR
+		      CALL CERRAR2
+
+		      JMP @@FIN5
+          
+        @@FIN5:
+
+          MOV AH,4CH
+          MOV AL,0
+          INT 21H
          
-ENDS
+codigo ENDS
 END INICIO   
