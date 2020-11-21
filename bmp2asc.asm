@@ -1059,7 +1059,7 @@ ENDP
    RET
 ENDP
 ;----------------------------------------------------------------------------
- SeekEnArchivo PROC NEAR
+ SeekEnArchivo PROC NEAR        ;IR AL PRINCIPIO SIEMPRE (AL ES 0 SIEMPRE)
 
       MOV  CX, 0                  
       MOV  DX, 0                           
@@ -1069,7 +1069,7 @@ ENDP
       RET
 ENDP; SeekEnArchivo.
 ;----------------------------------------------------------------------------
- SeekEnArchivo2 PROC NEAR
+ SeekEnArchivo2 PROC NEAR       ;IR AL FINAL SIEMPRE (SIEMPRE AL ES 1)
       CMP  AL, 1
       JE   @@Final
       CMP  AL, 2
